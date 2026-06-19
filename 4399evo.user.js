@@ -17,8 +17,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 
-// @homepageURL  https://github.com/nacrd/4399evo
-// @supportURL   https://github.com/nacrd/4399evo
+// @homepage  https://github.com/nacrd/4399evo
+// @support   https://github.com/nacrd/4399evo
 // ==/UserScript==
 
 (function () {
