@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         4399增强
 // @version      0.7.0
-// @description  [✨无限资源/免广告/移除页面广告/自动签到/更新检测] 菜单精简版
-// @author       原作者dsy4567 awwwww
+// @description  
+// @author       awwwwwwww 原作者github@dsy4567
 // @icon         http://4399.com/favicon.ico
 // @run-at       document-start
 // @license      MIT
@@ -28,7 +28,7 @@
 
     // ---------- 配置存储 ----------
     const config = {
-        adMultiplier: GM_getValue('AD', 1),
+        adMultiplier: Number(GM_getValue('AD', 1)),   // 确保为数字
         ua: GM_getValue('UA', navigator.userAgent),
         delayMode: GM_getValue('延时模式') === '1',
         removePageAds: GM_getValue('移除页面广告', true),
@@ -55,8 +55,7 @@
 
     // ---------- 工具函数 ----------
     const getAdMultiplier = () => {
-        const val = config.adMultiplier;
-        const num = Number(val);
+        const num = Number(config.adMultiplier);
         return isNaN(num) || num === 0 ? 1 : num;
     };
 
@@ -370,7 +369,7 @@
         registerDynamicMenu(`自动更新: ${autoUpdateLabel}`, () => {});
     }
 
-    // ---------- 新功能：菜单分组（设置面板） ----------
+    // ---------- 菜单分组（设置面板） ----------
     function showSettingsPanel() {
         const options = [
             `1. 延时模式 (当前: ${config.delayMode ? '开启' : '关闭'})`,
@@ -381,7 +380,8 @@
             `6. 奖励倍数 (当前: ${getAdMultiplier()})`,
             `7. 立即检查更新`,
             `8. 设置更新检查地址`,
-            `9. 退出`
+            `9. 刷新页面（使部分设置生效）`,
+            `0. 退出`
         ];
         const choice = prompt(
             '⚙️ 功能设置面板\n输入序号进行操作：\n\n' + options.join('\n')
@@ -392,7 +392,7 @@
             case '1':
                 config.delayMode = !config.delayMode;
                 GM_setValue('延时模式', config.delayMode ? '1' : '0');
-                showToast(`延时模式已${config.delayMode ? '开启' : '关闭'}`, 'success');
+                showToast(`延时模式已${config.delayMode ? '开启' : '关闭'}，立即刷新`, 'success');
                 location.reload();
                 break;
             case '2':
@@ -451,6 +451,9 @@
                 }
                 break;
             case '9':
+                location.reload();
+                break;
+            case '0':
                 break;
             default:
                 showToast('无效的选项', 'error');
@@ -487,7 +490,7 @@
 
     function showMultiplierSettings() {
         const choice = prompt(
-            `当前广告奖励倍数: ${getAdMultiplier()}\n\n输入新倍数 (或选预设: 1 或 1000)`,
+            `当前广告奖励倍数: ${getAdMultiplier()}\n\n输入新倍数（过大可能导致卡顿，建议 1~100）`,
             getAdMultiplier()
         );
         if (choice === null) return;
@@ -497,9 +500,9 @@
             return;
         }
         GM_setValue('AD', String(num));
-        config.adMultiplier = num;
+        config.adMultiplier = num;   // 保证 config 中为数字
         updateMenu();
-        showToast(`奖励倍数已设为 ${num}`, 'success');
+        showToast(`奖励倍数已设为 ${num}，下次广告生效`, 'success');
     }
 
     // ---------- 主逻辑 ----------
@@ -532,7 +535,6 @@
                 if (initMenus.done) return;
                 initMenus.done = true;
 
-                // 精简菜单：只保留常用入口 + 设置面板
                 GM_registerMenuCommand('⚙️ 功能设置面板', showSettingsPanel);
                 GM_registerMenuCommand('🔄 解决访问错误', () => location.reload());
                 GM_registerMenuCommand('🔍 立即检查更新', () => checkForUpdate(false));
