@@ -589,16 +589,16 @@
 
     function needsMorePolling() {
         for (const name of API_NAMES) {
+            // 没装上赋值监听时，当前对象即使已挂钩，页面仍可换上新对象。
+            // 这种情况下要把兜底轮询跑完，不能在第一次挂钩后停掉。
+            if (!watcherInstalled[name]) return true;
             let api = null;
             try { api = pageWindow[name]; } catch (e) { return true; }
-            if (!watcherInstalled[name]) {
-                if (!isObjectLike(api) || !isHook(api.playAd)) return true;
-            } else if (isObjectLike(api)) {
-                try {
-                    if (!isHook(api.playAd)) return true;
-                } catch (e) {
-                    return true;
-                }
+            if (!isObjectLike(api)) continue;
+            try {
+                if (!isHook(api.playAd)) return true;
+            } catch (e) {
+                return true;
             }
         }
         return false;
